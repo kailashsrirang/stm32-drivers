@@ -17,26 +17,31 @@ void Default_Handler(void)
 
 void Reset_Handler(void)
 {
-    uint32_t *src, *dest;
+    uint32_t *src = &_sidata;
+    uint32_t *dest = &_sdata;
 
-    dest = &_sdata;
-    src = &_sidata;
-    while (src != &_edata)
+    /* Copy initialized global/static variables from Flash to RAM. */
+    while (dest != &_edata)
     {
-        *dest = *src;
-        dest++;
-        src++;
+        *dest++ = *src++;
     }
 
+    /* Zero uninitialized global/static variables in RAM. */
     dest = &_sbss;
+
     while (dest != &_ebss)
     {
-        *dest = 0;
-        dest++;
+        *dest++ = 0U;
     }
 
-    main();
+    (void)main();
+
+    /* There is no operating system to return to. */
+    while (1)
+    {
+    }
 }
+
 __attribute__((section(".isr_vector")))
 const uint32_t vector_table[98] =
     {

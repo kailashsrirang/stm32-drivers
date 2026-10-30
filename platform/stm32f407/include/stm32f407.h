@@ -1,8 +1,10 @@
 #ifndef STM32F407_H
 #define STM32F407_H
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
+#include "stm32f407.h"
 
 // RCC base address
 #define RCC_BASE 0x40023800U
@@ -44,6 +46,24 @@
 #define GPIO_PIN_COUNT 16U
 #define GPIO_PORT_SPACING 0x0400UL
 
+#define TIM2_BASE 0x40000000U
+#define TIM3_BASE 0x40000400U
+#define TIM4_BASE 0x40000800U
+#define TIM5_BASE 0x40000C00U
+
+#define RCC_TIM2EN (1U << 0)
+#define RCC_TIM3EN (1U << 1)
+#define RCC_TIM4EN (1U << 2)
+#define RCC_TIM5EN (1U << 3)
+
+#define RCC_TIM2RST (1U << 0)
+#define RCC_TIM3RST (1U << 1)
+#define RCC_TIM4RST (1U << 2)
+#define RCC_TIM5RST (1U << 3)
+
+#define TIM_CR1_CEN (1U << 0)
+#define TIM_EGR_UG (1U << 0)
+
 typedef struct
 {
     volatile uint32_t MODER;   // GPIO port mode register
@@ -57,6 +77,27 @@ typedef struct
     volatile uint32_t AFRL;    // GPIO alternate function low register
     volatile uint32_t AFRH;    // GPIO alternate function high register
 } GPIO_Registers;
+
+typedef struct
+{
+    volatile uint32_t CR1;   // 0x00: Control register 1
+    volatile uint32_t CR2;   // 0x04: Control register 2
+    volatile uint32_t SMCR;  // 0x08: Slave mode control
+    volatile uint32_t DIER;  // 0x0C: DMA/interrupt enable
+    volatile uint32_t SR;    // 0x10: Status
+    volatile uint32_t EGR;   // 0x14: Event generation
+    volatile uint32_t CCMR1; // 0x18: Capture/compare mode 1
+    volatile uint32_t CCMR2; // 0x1C: Capture/compare mode 2
+    volatile uint32_t CCER;  // 0x20: Capture/compare enable
+    volatile uint32_t CNT;   // 0x24: Counter
+    volatile uint32_t PSC;   // 0x28: Prescaler
+    volatile uint32_t ARR;   // 0x2C: Auto-reload
+    uint32_t RESERVED0;      // 0x30: Reserved
+    volatile uint32_t CCR1;  // 0x34: Capture/compare 1
+    volatile uint32_t CCR2;  // 0x38: Capture/compare 2
+    volatile uint32_t CCR3;  // 0x3C: Capture/compare 3
+    volatile uint32_t CCR4;  // 0x40: Capture/compare 4
+} Timer_Registers;
 
 _Static_assert(offsetof(GPIO_Registers, MODER) == 0x00U, "GPIO MODER offset is incorrect");
 _Static_assert(offsetof(GPIO_Registers, BSRR) == 0x18U, "GPIO BSRR offset is incorrect");
@@ -77,9 +118,16 @@ typedef struct
     volatile uint32_t APB2RSTR; /* Offset 0x24 */
     uint32_t RESERVED1[2];      /* Offsets 0x28–0x2C */
     volatile uint32_t AHB1ENR;  /* Offset 0x30 */
+    volatile uint32_t AHB2ENR;  /* Offset 0x34 */
+    volatile uint32_t AHB3ENR;  /* Offset 0x38 */
+    uint32_t RESERVED2;         /* Offset 0x3C */
+    volatile uint32_t APB1ENR;  /* Offset 0x40 */
+    volatile uint32_t APB2ENR;  /* Offset 0x44 */
 } Rcc_Registers;
 
 _Static_assert(offsetof(Rcc_Registers, AHB1ENR) == 0x30U, "RCC AHB1ENR offset is incorrect");
+
+_Static_assert(offsetof(Rcc_Registers, APB1ENR) == 0x40U, "RCC APB1ENR offset is incorrect");
 
 #define GPIOA ((GPIO_Registers *)GPIOA_BASE)
 #define GPIOB ((GPIO_Registers *)GPIOB_BASE)
@@ -90,5 +138,10 @@ _Static_assert(offsetof(Rcc_Registers, AHB1ENR) == 0x30U, "RCC AHB1ENR offset is
 #define GPIOG ((GPIO_Registers *)GPIOG_BASE)
 #define GPIOH ((GPIO_Registers *)GPIOH_BASE)
 #define GPIOI ((GPIO_Registers *)GPIOI_BASE)
+
+#define TIM2 ((Timer_Registers *)TIM2_BASE)
+#define TIM3 ((Timer_Registers *)TIM3_BASE)
+#define TIM4 ((Timer_Registers *)TIM4_BASE)
+#define TIM5 ((Timer_Registers *)TIM5_BASE)
 
 #endif

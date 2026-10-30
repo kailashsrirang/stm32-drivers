@@ -7,6 +7,26 @@
 
 typedef enum
 {
+    GPIO_AF0 = 0U,
+    GPIO_AF1 = 1U,
+    GPIO_AF2 = 2U,
+    GPIO_AF3 = 3U,
+    GPIO_AF4 = 4U,
+    GPIO_AF5 = 5U,
+    GPIO_AF6 = 6U,
+    GPIO_AF7 = 7U,
+    GPIO_AF8 = 8U,
+    GPIO_AF9 = 9U,
+    GPIO_AF10 = 10U,
+    GPIO_AF11 = 11U,
+    GPIO_AF12 = 12U,
+    GPIO_AF13 = 13U,
+    GPIO_AF14 = 14U,
+    GPIO_AF15 = 15U
+} GPIO_AlternateFunction;
+
+typedef enum
+{
     GPIO_MODE_INPUT = 0U,
     GPIO_MODE_OUTPUT = 1U,
     GPIO_MODE_ALTERNATE = 2U,
@@ -40,5 +60,6 @@ bool gpioWritePin(GPIO_Registers *gpio, uint8_t pin, bool value);
 bool gpioTogglePin(GPIO_Registers *gpio, uint8_t pin);
 bool gpioReadPin(const GPIO_Registers *gpio, uint8_t pin, bool *value);
 bool gpioConfigureOutput(GPIO_Registers *gpio, uint8_t pin, GpioOutputType type, GpioSpeed speed, GpioPull pull, bool initialValue);
+bool gpioConfigureAlternate(GPIO_Registers *gpio, uint8_t pin, GPIO_AlternateFunction alternateFunction, GpioOutputType type, GpioSpeed speed, GpioPull pull);
 
 #endif

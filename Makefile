@@ -5,7 +5,8 @@ TARGET := build/minimal.elf
 
 SOURCES := examples/minimal/main.c \
           platform/stm32f407/startup/startup.c \
-          platform/stm32f407/src/gpio.c
+          platform/stm32f407/src/gpio.c \
+          platform/stm32f407/src/timer.c
 
 OBJECTS := $(patsubst %.c,build/%.o,$(SOURCES))
 DEPS := $(OBJECTS:.o=.d)
@@ -31,6 +32,12 @@ LDFLAGS := -nostdlib \
            -Wl,-Map=build/minimal.map
 
 .PHONY: all clean
+
+.PHONY: flash
+
+flash: $(TARGET)
+	openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c "program $(TARGET) verify reset exit"
+
 
 all: $(TARGET)
 

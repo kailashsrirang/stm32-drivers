@@ -185,3 +185,42 @@ bool gpioConfigureOutput(GPIO_Registers *gpio, uint8_t pin, GpioOutputType type,
 
     return gpioSetMode(gpio, pin, GPIO_MODE_OUTPUT);
 }
+
+bool gpioConfigureAlternate(GPIO_Registers *gpio, uint8_t pin, GPIO_AlternateFunction alternateFunction, GpioOutputType type, GpioSpeed speed, GpioPull pull)
+{
+
+    if (!gpioIsValidPort(gpio) || !gpioIsClockEnabled(gpio))
+    {
+        return false;
+    }
+
+    if (
+        (uint32_t)type > (uint32_t)GPIO_OUTPUT_OPEN_DRAIN ||
+        (uint32_t)speed > (uint32_t)GPIO_SPEED_HIGH ||
+        (uint32_t)pull > (uint32_t)GPIO_PULL_DOWN ||
+        pin >= GPIO_PIN_COUNT ||
+        (uint32_t)alternateFunction > 15U)
+    {
+        return false;
+    }
+
+    uint32_t shift = ((uint32_t)pin);
+    gpio->OTYPER = (gpio->OTYPER & ~(1U << (shift))) | ((uint32_t)(type) << shift);
+
+    shift = (uint32_t)pin * 2U;
+
+    gpio->OSPEEDR = (gpio->OSPEEDR & ~(3U << shift)) | ((uint32_t)speed << shift);
+
+    gpio->PUPDR = (gpio->PUPDR & ~(3U << shift)) | ((uint32_t)pull << shift);
+
+    volatile uint32_t *afr = &(gpio->AFRL);
+    shift = (((uint32_t)pin) % 8U) * 4U;
+    if (pin > 7)
+    {
+        afr = &(gpio->AFRH);
+    }
+
+    *afr = (*afr & ~(15U << shift)) | ((uint32_t)alternateFunction << shift);
+
+    return gpioSetMode(gpio, pin, GPIO_MODE_ALTERNATE);
+}
