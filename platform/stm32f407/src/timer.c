@@ -34,6 +34,18 @@ static bool timerGetInfo(const Timer_Registers *timer, uint32_t *clockMask, uint
     return true;
 }
 
+static volatile uint32_t *timerGetCompareRegister(Timer_Registers *timer, uint8_t channel)
+{
+    uint32_t clockMask;
+    uint32_t resetMask;
+    uint32_t maxCount;
+    if (channel < 1U || channel > 4U || !timerGetInfo(timer, &clockMask, &resetMask, &maxCount))
+    {
+        return NULL; // Safety guard for invalid channels
+    }
+    return &timer->CCR1 + (channel - 1U);
+}
+
 static bool timerIsClockEnabled(const Timer_Registers *timer)
 {
     uint32_t clockMask;
@@ -130,5 +142,90 @@ bool timerReadCounter(const Timer_Registers *timer, uint32_t *count)
     }
 
     *count = timer->CNT;
+    return true;
+}
+
+bool timerConfigurePwm(Timer_Registers *timer, uint8_t channel, uint32_t compareTicks)
+{
+    if (!timerIsClockEnabled(timer))
+    {
+        return false;
+    }
+
+    volatile uint32_t *ccr_reg = timerGetCompareRegister(timer, channel);
+
+    if (ccr_reg == NULL)
+    {
+        return false;
+    }
+
+    if ((timer->CR1 & TIM_CR1_CEN) != 0)
+    {
+        return false; // timer is already counting
+    }
+
+    if (compareTicks > timer->ARR)
+    {
+        return false;
+    }
+    uint32_t enableShift = ((uint32_t)channel - 1U) * 4U;
+
+    // disable this channel and select active-high polarity
+    timer->CCER &= ~(0xBU << enableShift);
+
+    volatile uint32_t *mode_register;
+    if (channel == 1 || channel == 2)
+    {
+        mode_register = &timer->CCMR1;
+    }
+    else
+    {
+        mode_register = &timer->CCMR2;
+    }
+
+    uint32_t modeShift = ((uint32_t)(channel - 1U) % 2U) * 8U;
+    uint32_t value =
+        (0U << 7U) | // external clearing disabled
+        (6U << 4U) | // PWM mode 1. val high when cnt < ccr low after
+        (1U << 3U) | // compare preload enabled
+        (0U << 2U) | // fast mode disabled
+        (0U << 0U);  // output mode
+
+    *mode_register = (*mode_register & ~(0xFFU << modeShift)) | (value << modeShift);
+
+    // write pulse width to preload reg
+    *ccr_reg = compareTicks;
+
+    //  generate an update event and load buffered values
+    timer->EGR = TIM_EGR_UG;
+
+    // clear update interrupt flag
+    timer->SR = 0U;
+
+    // enable output
+    timer->CCER |= (1U << enableShift);
+
+    return true;
+}
+
+bool timerSetCompare(Timer_Registers *timer, uint8_t channel, uint32_t compareTicks)
+{
+    if (!timerIsClockEnabled(timer))
+    {
+        return false;
+    }
+
+    volatile uint32_t *ccr_reg = timerGetCompareRegister(timer, channel);
+    if (ccr_reg == NULL)
+    {
+        return false;
+    }
+
+    if (compareTicks > timer->ARR)
+    {
+        return false;
+    }
+
+    *ccr_reg = compareTicks;
     return true;
 }

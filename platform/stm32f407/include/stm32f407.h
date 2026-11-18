@@ -11,6 +11,10 @@
 
 #define RCC ((Rcc_Registers *)((RCC_BASE)))
 
+#define I2C1 ((I2C_Registers *)0x40005400UL)
+#define I2C2 ((I2C_Registers *)0x40005800UL)
+#define I2C3 ((I2C_Registers *)0x40005C00UL)
+
 #define RCC_GPIOAEN (1U << 0)
 #define RCC_GPIOBEN (1U << 1)
 #define RCC_GPIOCEN (1U << 2)
@@ -63,6 +67,14 @@
 
 #define TIM_CR1_CEN (1U << 0)
 #define TIM_EGR_UG (1U << 0)
+
+#define RCC_I2C1EN (1U << 21U)
+#define RCC_I2C1RST (1U << 21U)
+#define RCC_I2C2EN (1U << 22U)
+#define RCC_I2C2RST (1U << 22U)
+#define RCC_I2C3EN (1U << 23U)
+#define RCC_I2C3RST (1U << 23U)
+#define I2C_CR1_PE (1U << 0U)
 
 typedef struct
 {
@@ -128,6 +140,19 @@ typedef struct
 _Static_assert(offsetof(Rcc_Registers, AHB1ENR) == 0x30U, "RCC AHB1ENR offset is incorrect");
 
 _Static_assert(offsetof(Rcc_Registers, APB1ENR) == 0x40U, "RCC APB1ENR offset is incorrect");
+
+typedef struct
+{
+    volatile uint32_t CR1;
+    volatile uint32_t CR2;
+    volatile uint32_t OAR1;
+    volatile uint32_t OAR2;
+    volatile uint32_t DR;
+    volatile uint32_t SR1;
+    volatile uint32_t SR2;
+    volatile uint32_t CCR;
+    volatile uint32_t TRISE;
+} I2C_Registers;
 
 #define GPIOA ((GPIO_Registers *)GPIOA_BASE)
 #define GPIOB ((GPIO_Registers *)GPIOB_BASE)
