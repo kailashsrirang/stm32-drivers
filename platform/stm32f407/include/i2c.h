@@ -38,7 +38,6 @@ typedef enum
 
 typedef uint32_t (*I2cGetTimeUs)(void);
 bool i2cInit(I2C_Registers *i2c, uint32_t peripheralClockHz, uint32_t busHz);
-static I2cStatus i2cWaitForFlag(const I2C_Registers *i2c, uint32_t flagMask, I2cGetTimeUs getTimeUs, uint32_t startUs, uint32_t timeoutUs);
 I2cStatus i2cMasterWrite(I2C_Registers *i2c, uint8_t address, const uint8_t *data, uint32_t length, I2cGetTimeUs getTimeUs, uint32_t timeoutUs);
 I2cStatus i2cMasterRead(I2C_Registers *i2c, uint8_t address, uint8_t *data, uint32_t length, I2cGetTimeUs getTimeUs, uint32_t timeoutUs);
 I2cStatus i2cMasterWriteRead(I2C_Registers *i2c, uint8_t address, const uint8_t *writeData, uint32_t writeLength, uint8_t *readData, uint32_t readLength, I2cGetTimeUs getTimeUs, uint32_t timeoutUs);

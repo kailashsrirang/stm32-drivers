@@ -1,5 +1,6 @@
 CC := arm-none-eabi-gcc
 SIZE := arm-none-eabi-size
+.DEFAULT_GOAL := all
 
 TARGET := build/minimal.elf
 

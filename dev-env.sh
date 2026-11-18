@@ -1,15 +1,15 @@
 #!/bin/bash
 
 SESSION_NAME="rtos-dev"
-PROJECT_DIR="/Users/kailashsriranganathan/Documents/stm32-drivers"
-ELF_PATH="build/kernel.elf"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ELF_PATH="build/minimal.elf"
 
 # 1. Kill any existing session with this name to avoid conflicts
 tmux kill-session -t $SESSION_NAME 2>/dev/null
 
 # 2. Start a new detached session with Window 0 (Build & Flash)
 tmux new-session -d -s $SESSION_NAME -n "Build"
-tmux send-keys -t $SESSION_NAME:0 "cd $PROJECT_DIR && make clean && make && make flash" C-m
+tmux send-keys -t $SESSION_NAME:0 "cd $PROJECT_DIR && make clean && make all && make flash" C-m
 
 # 3. Create Window 1 (OpenOCD)
 tmux new-window -t $SESSION_NAME:1 -n "OpenOCD"

@@ -62,7 +62,5 @@ bool servoSetPosition(const Servo *servo, uint16_t position)
     uint64_t offset = ((uint64_t)(servo->maxPulseUs - servo->minPulseUs) * position) / 1000U;
 
     uint32_t pulseUs = servo->minPulseUs + (uint32_t)offset;
-    servoSetPulseUs(servo, offset);
-
-    return true;
+    return servoSetPulseUs(servo, pulseUs);
 }
