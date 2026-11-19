@@ -1,8 +1,11 @@
 CC := arm-none-eabi-gcc
 SIZE := arm-none-eabi-size
+HOST_CC ?= cc
 .DEFAULT_GOAL := all
 
 TARGET := build/minimal.elf
+UNITY_DIR := tests/unity/src
+SERVO_TEST := build/tests/test_servo
 
 SOURCES := examples/minimal/main.c \
           platform/stm32f407/startup/startup.c \
@@ -46,7 +49,7 @@ LDFLAGS := -nostdlib \
            -Wl,--gc-sections \
            -Wl,-Map=build/minimal.map
 
-.PHONY: all clean
+.PHONY: all clean test-unit
 
 .PHONY: flash
 
@@ -55,6 +58,19 @@ flash: $(TARGET)
 
 
 all: $(TARGET)
+
+test-unit: $(SERVO_TEST)
+	./$(SERVO_TEST)
+
+$(SERVO_TEST): tests/test_servo.c tests/fakes/timer_fake.c tests/fakes/timer_fake.h \
+               platform/stm32f407/src/servo.c platform/stm32f407/include/servo.h \
+               platform/stm32f407/include/timer.h platform/stm32f407/include/stm32f407.h \
+               $(UNITY_DIR)/unity.c $(UNITY_DIR)/unity.h $(UNITY_DIR)/unity_internals.h Makefile
+	mkdir -p $(dir $@)
+	$(HOST_CC) -std=c11 -Wall -Wextra -Werror \
+		-I$(UNITY_DIR) -Itests/fakes -Iplatform/stm32f407/include \
+		tests/test_servo.c tests/fakes/timer_fake.c \
+		platform/stm32f407/src/servo.c $(UNITY_DIR)/unity.c -o $@
 
 $(TARGET): $(OBJECTS) $(LINKER_SCRIPT) Makefile
 	mkdir -p build
